@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="NearLink — local-first messaging interface.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <title>NearLink</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="NearLink home">
+        <span class="brand-mark">N</span>
+        <span><strong>NearLink</strong><small>Messages nearby</small></span>
+      </a>
+      <div class="top-actions">
+        <span class="connection-pill"><i></i><span id="connectionText">Offline-ready</span></span>
+        <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">☼</button>
+      </div>
+    </header>
+
+    <main class="layout" id="layout">
+      <aside class="sidebar">
+        <div class="section-head">
+          <div><p class="eyebrow">YOUR SPACE</p><h1>Messages</h1></div>
+          <button class="primary small" id="newChatBtn">＋ New</button>
+        </div>
+        <label class="search"><span>⌕</span><input id="searchInput" placeholder="Search conversations" autocomplete="off"></label>
+        <div class="filter-row"><span>Recent</span><span class="muted" id="chatCount">0 chats</span></div>
+        <div id="chatList" class="chat-list"></div>
+        <div class="sidebar-note">
+          <span class="note-icon">◎</span>
+          <div><strong>Local-first</strong><p>Your demo conversations stay on this device.</p></div>
+        </div>
+      </aside>
+
+      <section class="chat-panel">
+        <div id="emptyState" class="empty-state">
+          <div class="empty-art"><span>↗</span><b>N</b><i>✳</i></div>
+          <p class="eyebrow">WELCOME TO NEARLINK</p>
+          <h2>Good conversations<br>start nearby.</h2>
+          <p class="muted">Choose a conversation or create one to explore the interface.</p>
+          <button class="primary" id="emptyNewBtn">Start a conversation</button>
+        </div>
+
+        <div id="conversation" class="conversation hidden">
+          <div class="conversation-head">
+            <div class="avatar" id="activeAvatar">N</div>
+            <div class="person-meta"><strong id="activeName">Conversation</strong><span id="activeStatus">Saved on this device</span></div>
+            <button class="icon-btn" id="infoBtn" aria-label="Conversation information">ⓘ</button>
+          </div>
+          <div class="demo-banner"><span>ⓘ</span> Interface preview: messages are stored locally. No nearby device is connected yet.</div>
+          <div id="messages" class="messages"></div>
+          <form id="messageForm" class="composer">
+            <button type="button" class="icon-btn attach" id="attachBtn" aria-label="Attachment unavailable" title="File sharing will arrive in a later version">＋</button>
+            <textarea id="messageInput" rows="1" maxlength="2000" placeholder="Write a message…" aria-label="Write a message"></textarea>
+            <button class="send-btn" type="submit" aria-label="Save message">↑</button>
+          </form>
+          <p class="composer-hint">Enter to send · Shift + Enter for a new line</p>
+        </div>
+      </section>
+    </main>
+    <nav class="mobile-nav">
+      <button class="active" data-tab="chats">▤<span>Chats</span></button>
+      <button id="nearbyTab">⌁<span>Nearby</span></button>
+      <button id="settingsTab">⚙<span>Settings</span></button>
+    </nav>
+  </div>
+
+  <dialog id="newChatDialog">
+    <form method="dialog" id="newChatForm" class="dialog-card">
+      <div class="dialog-title"><div><p class="eyebrow">NEW CONVERSATION</p><h2>Who are you chatting with?</h2></div><button class="icon-btn" value="cancel" aria-label="Close">×</button></div>
+      <label class="field-label" for="contactName">Display name</label>
+      <input id="contactName" class="text-field" maxlength="40" placeholder="e.g. Alex" required>
+      <p class="muted tiny">This creates a local demo conversation. It does not connect to another device.</p>
+      <button class="primary full" id="createChatBtn" value="default">Create conversation</button>
+    </form>
+  </dialog>
+
+  <dialog id="infoDialog"><div class="dialog-card"><div class="dialog-title"><h2>About this chat</h2><button class="icon-btn" id="closeInfo">×</button></div><p class="muted">This MVP stores messages locally in this browser using IndexedDB. Direct device communication, encryption and mesh relay are not implemented yet.</p></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
