@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "NearLink — Offline Chat",
+  "short_name": "NearLink",
+  "description": "A local-first messaging interface.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1421",
+  "theme_color": "#101827",
+  "icons": [
+    {"src":"./icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
