@@ -28,4 +28,5 @@ android {
 
 dependencies {
     implementation("androidx.webkit:webkit:1.12.1")
+    implementation("com.google.android.gms:play-services-nearby:19.5.1")
 }
