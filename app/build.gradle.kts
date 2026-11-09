@@ -21,11 +21,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+    compilerOptions {
+        jvmTarget.set(
+            org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        )
+    }
     }
 }
-
 dependencies {
     implementation("androidx.webkit:webkit:1.12.1")
     implementation("com.google.android.gms:play-services-nearby:19.5.1")
