@@ -51,7 +51,7 @@ function renderChats() {
     const summary = document.createElement("span"); summary.className="chat-summary";
     const name = document.createElement("strong"); name.textContent=chat.name;
     const preview = document.createElement("p"); preview.textContent=latest(chat);
-    const time = document.createElement("span"); time.className="chat-time"; time.textContent=chat.messages.length ? "Local" : "";
+    const time = document.createElement("span"); time.className="chat-time"; time.textContent=chat.messages.length ? "On device" : "";
     summary.append(name,preview); button.append(avatar,summary,time);
     button.addEventListener("click",()=>selectChat(chat.id)); list.append(button);
   });
@@ -64,7 +64,7 @@ function renderMessages() {
   chat.messages.forEach(msg=>{
     const bubble=document.createElement("div"); bubble.className="message "+(msg.mine?"mine":"theirs");
     const body=document.createElement("div"); body.textContent=msg.text;
-    const time=document.createElement("small"); time.textContent=new Date(msg.time).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+" · saved";
+    const time=document.createElement("small"); time.textContent=new Date(msg.time).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+" · "+(msg.status||"saved");
     bubble.append(body,time); box.append(bubble);
   });
   box.scrollTop=box.scrollHeight;
@@ -79,9 +79,48 @@ async function createChat(name) {
 }
 async function sendMessage(text) {
   const chat=chats.find(c=>c.id===activeId); if(!chat) return;
-  chat.messages.push({id:crypto.randomUUID(),text,mine:true,time:Date.now()});
+  const id=crypto.randomUUID();
+  chat.messages.push({id,text,mine:true,time:Date.now(),status:"pending"});
   chat.updatedAt=Date.now(); await saveChat(chat); renderChats(); renderMessages();
+  if (window.NearLinkNative) window.NearLinkNative.sendMessage(text,id);
+  else toast("Native nearby messaging is available in the Android APK.");
 }
+function nativeEvent(raw) {
+  let e; try { e=JSON.parse(raw); } catch { return; }
+  const d=e.data||{};
+  if(e.event==="device-found") {
+    if(!document.getElementById("device-"+CSS.escape(d.endpointId))) {
+      const yes=confirm("Nearby device found: "+d.name+". Connect?");
+      if(yes) window.NearLinkNative.connect(d.endpointId);
+    }
+  } else if(e.event==="connected") {
+    $("activeStatus").textContent="Connected · "+d.name; toast("Connected to "+d.name);
+  } else if(e.event==="disconnected") {
+    $("activeStatus").textContent="Disconnected"; toast("Device disconnected");
+  } else if(e.event==="message-received") {
+    receiveMessage(d);
+  } else if(e.event==="message-delivered") {
+    updateMessageStatus(d.id,"delivered");
+  } else if(e.event==="message-failed") {
+    updateMessageStatus(d.id,"failed"); toast(d.reason||"Message failed");
+  } else if(e.event==="native-error") toast(d.message||"Nearby connection error");
+  else if(e.event==="discovery-started") toast("Searching for nearby NearLink devices…");
+  else if(e.event==="permission" && !d.granted) toast("Nearby permissions are required.");
+}
+async function updateMessageStatus(id,status) {
+  const chat=chats.find(c=>c.messages.some(m=>m.id===id)); if(!chat)return;
+  const msg=chat.messages.find(m=>m.id===id); msg.status=status;
+  await saveChat(chat); renderMessages();
+}
+async function receiveMessage(d) {
+  let chat=chats.find(c=>c.id===activeId);
+  if(!chat) { await createChat("Nearby device"); chat=chats.find(c=>c.id===activeId); }
+  if(chat.messages.some(m=>m.id===d.id)) return;
+  chat.messages.push({id:d.id,text:d.text,mine:false,time:d.time||Date.now(),status:"delivered"});
+  chat.updatedAt=Date.now(); await saveChat(chat); renderChats(); renderMessages();
+  toast("Message received");
+}
+window.addEventListener("nearlink-native", e=>nativeEvent(e.detail));
 function applyTheme(theme) {
   document.documentElement.dataset.theme=theme;
   localStorage.setItem("nearlink-theme",theme);
@@ -96,7 +135,7 @@ async function init() {
   if("serviceWorker" in navigator && location.protocol!=="file:") {
     navigator.serviceWorker.register("./service-worker.js").catch(err=>console.warn("SW registration:",err));
   }
-  $("connectionText").textContent=navigator.onLine?"Offline-ready":"Offline";
+  $("connectionText").textContent="Local-first";
 }
 $("newChatBtn").addEventListener("click",()=>$("newChatDialog").showModal());
 $("emptyNewBtn").addEventListener("click",()=>$("newChatDialog").showModal());
@@ -116,7 +155,7 @@ $("searchInput").addEventListener("input",renderChats);
 $("themeBtn").addEventListener("click",()=>applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark"));
 $("infoBtn").addEventListener("click",()=>$("infoDialog").showModal());
 $("closeInfo").addEventListener("click",()=>$("infoDialog").close());
-$("nearbyTab").addEventListener("click",()=>toast("Nearby discovery is planned for the native networking phase."));
+$("nearbyTab").addEventListener("click",()=>{ if(window.NearLinkNative) window.NearLinkNative.startDiscovery(); else toast("Nearby discovery requires the Android app."); });
 $("settingsTab").addEventListener("click",()=>toast("Use the sun/moon button to switch themes."));
 $("attachBtn").addEventListener("click",()=>toast("File sharing is planned for a later release."));
 window.addEventListener("online",()=>{$("connectionText").textContent="Offline-ready";});

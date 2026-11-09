@@ -53,7 +53,7 @@
             <div class="person-meta"><strong id="activeName">Conversation</strong><span id="activeStatus">Saved on this device</span></div>
             <button class="icon-btn" id="infoBtn" aria-label="Conversation information">ⓘ</button>
           </div>
-          <div class="demo-banner"><span>ⓘ</span> Interface preview: messages are stored locally. No nearby device is connected yet.</div>
+          <div class="demo-banner"><span>ⓘ</span> Nearby messaging: tap Nearby to discover phones. Accept only when the verification codes match.</div>
           <div id="messages" class="messages"></div>
           <form id="messageForm" class="composer">
             <button type="button" class="icon-btn attach" id="attachBtn" aria-label="Attachment unavailable" title="File sharing will arrive in a later version">＋</button>
@@ -81,7 +81,7 @@
     </form>
   </dialog>
 
-  <dialog id="infoDialog"><div class="dialog-card"><div class="dialog-title"><h2>About this chat</h2><button class="icon-btn" id="closeInfo">×</button></div><p class="muted">This MVP stores messages locally in this browser using IndexedDB. Direct device communication, encryption and mesh relay are not implemented yet.</p></div></dialog>
+  <dialog id="infoDialog"><div class="dialog-card"><div class="dialog-title"><h2>About this chat</h2><button class="icon-btn" id="closeInfo">×</button></div><p class="muted">NearLink uses Google Nearby Connections for encrypted peer-to-peer transport. Compare the pairing verification code before accepting. Messages are stored locally; mesh relay is not implemented.</p></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./app.js" defer></script>
 </body>
